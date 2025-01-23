@@ -1,0 +1,5 @@
+/.venv
+/real_transcription.csv
+/spark-warehouse
+/static
+/words.csv

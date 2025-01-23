@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru"> <!-- Указываем язык страницы -->
+
+<head>
+    <meta charset="UTF-8"> <!-- Указываем кодировку символов -->
+    <title>Исполнитель SQL-запросов</title> <!-- Заголовок страницы на русском -->
+    <style>
+        body {
+            /* Стили для элемента body */
+            display: flex;
+            /* Используем flexbox для позиционирования */
+            flex-direction: column;
+            /* Располагаем элементы по вертикали */
+            align-items: center;
+            /* Выравниваем элементы по центру горизонтали */
+            justify-content: center;
+            /* Выравниваем элементы по центру вертикали */
+            min-height: 100vh;
+            /* Занимаем всю высоту видимой области */
+            margin: 0;
+            /* Убираем отступы */
+            background-color: #f5f5dc;
+            /* Бежевый фон */
+            font-family: sans-serif;
+            /* Устанавливаем шрифт по умолчанию */
+            text-align: center;
+            /* Выравниваем текст по центру внутри body */
+        }
+
+        h1 {
+            /* Стили для заголовка */
+            margin-bottom: 20px;
+            /* Устанавливаем отступ снизу */
+        }
+
+        form {
+            /* Стили для формы */
+            display: inline-block;
+            /* Позволяет выравнивать форму по центру */
+            text-align: left;
+            /* Выравниваем текст по левому краю внутри формы */
+            margin-bottom: 20px;
+            /* Устанавливаем отступ снизу */
+        }
+
+        table {
+            /* Стили для таблицы с результатами */
+            margin-top: 20px;
+            /* Устанавливаем отступ сверху */
+            border-collapse: collapse;
+            /*Убираем двойные границы*/
+            text-align: center;
+            /* Выравниваем текст по центру */
+        }
+
+        table,
+        th,
+        td {
+            /* Стили для таблицы, заголовков и ячеек */
+            border: 1px solid black;
+            /* Рамка */
+            padding: 8px;
+            /* Отступы */
+        }
+
+        label {
+            /* Стили для лейбла */
+            display: block;
+            margin-bottom: 5px;
+            /* Отступ снизу */
+        }
+
+        select {
+            /* Стили для выпадающего списка */
+            margin-bottom: 10px;
+            /* Отступ снизу */
+        }
+
+        button {
+            /* Стили для кнопки */
+            padding: 10px 20px;
+            /* Отступы внутри кнопки */
+            background-color: #b3a696;
+            /* Бежевый фон для кнопки */
+            border: none;
+            /* Без рамки */
+            cursor: pointer;
+            /* Меняем вид курсора */
+            font-size: 16px;
+            /* Размер шрифта */
+        }
+
+        button:hover {
+            /* Стили при наведении на кнопку */
+            background-color: #b99b72;
+            /* Темно бежевый фон */
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>SQLite Browser</h1>
+    <h2>Список таблиц</h2>
+
+    <!-- Форма для действий -->
+    <form method="post">
+        <select name="table_name" id="table_name">
+            <option value="">-- Список таблиц--</option>
+            <option value="filenames">filenames</option>
+            <option value="F0">F0</option>
+            <option value="Ideal_transcription">Ideal_transcription</option>
+            <option value="Real_transcription">Real_transcription</option>
+            <option value="Sintagmas">Sintagmas</option>
+            <option value="Words">Words</option>
+        </select>
+    </form>
+
+    <h2>Выполнить SQL запрос</h2>
+    <div class="container">
+        <div class="block">
+            <h2>Выберите запрос:</h2>
+            <form method="POST">
+                <label for="query">Выберите запрос:</label>
+                <!-- Элемент выбора запроса (выпадающий список)
+                "name="query"" указывает имя, которое будет использовано при отправке формы
+                "id="query"" является уникальным идентификатором элемента -->
+                <select name="query" id="query">
+                    <!-- Цикл Jinja2, который проходит по словарю запросов (queries), переданных из app.py
+                    Каждый элемент словаря состоит из имени запроса (query_name) и самого запроса (query) -->
+                    {% for query_name, query in queries.items() %}
+                    <!-- Каждый элемент словаря становится опцией в выпадающем списке
+                    "value="{{ query_name }}"" задает значение, которое будет отправлено на сервер, когда эта опция будет выбрана (имя запроса).
+                    Текст "{{ query_name }}" — это отображаемое имя опции -->
+                    <option value="{{ query_name }}">{{ query_name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Выполнить</button>
+            </form>
+
+            <!-- конструкция Jinja2 отображает результаты запроса, только если переменная "results" не пустая (т.е. если запрос был выполнен и вернул результаты) -->
+            {% if selected_results %}
+            <h2>Результаты запроса:</h2>
+
+            <!-- HTML-таблица используется для отображения результатов SQL-запроса -->
+            <table>
+                <thead>
+                    <tr>
+                        <!-- Проверяем, что есть результаты (чтобы не было ошибки, если results пустой) -->
+                        {% if selected_results %}
+                        <!-- цикл проходит по первому элементу результатов (results[0]), предполагая, что это список столбцов -->
+                        {% for column in selected_results[0] %}
+                        {% endfor %}
+                        {% endif %}
+                    </tr>
+                </thead>
+                <!-- Тело таблицы (данные) -->
+                <tbody>
+                    <!-- цикл проходит по каждой строке результатов (results) -->
+                    {% for row in selected_results %}
+                    <!-- Строка таблицы -->
+                    <tr>
+                        <!-- цикл проходит по каждой ячейке в строке (row) -->
+                        {% for cell in row %}
+                        <!-- Ячейка таблицы (<td>) отображает значение ячейки -->
+                        <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+
+        <div class="block">
+            <h2>Введите свой запрос:</h2>
+            <form method="POST">
+                <textarea name="query"
+                    placeholder="Введите SQL-запрос, например SELECT (что) FROM (название таблицы) WHERE (условие)"
+                    rows="5" cols="50"></textarea><br>
+                <button type="submit">Выполнить</button>
+            </form>
+            {% if user_results %}
+            <h2>Результаты запроса:</h2>
+            <table>
+                <thead>
+                    <tr>
+                        {% if user_results %}
+                        {% for column in user_results[0] %}
+                        {% endfor %}
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in user_results %}
+                    <tr>
+                        {% for cell in row %}
+                        <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>
